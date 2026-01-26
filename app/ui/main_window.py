@@ -4,14 +4,16 @@ import logging
 from datetime import date, timedelta
 from pathlib import Path
 
-from PySide6.QtCore import QDate, QTimer
-from PySide6.QtGui import QKeySequence, QAction
+from PySide6.QtCore import QDate, Qt, QTimer
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QFileDialog,
+    QDialog,
     QMainWindow,
-    QShortcut,
     QTabWidget,
     QToolBar,
+    QToolButton,
+    QVBoxLayout,
 )
 
 from app import db
@@ -46,6 +48,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._tabs)
 
         self._build_toolbar()
+        self._apply_theme()
         self._week_view.set_week(self._current_week_start)
         self._day_view.update_date(date.today())
 
@@ -58,6 +61,7 @@ class MainWindow(QMainWindow):
 
     def _build_toolbar(self) -> None:
         toolbar = QToolBar("Навигация")
+        toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
         prev_action = QAction("← Неделя", self)
@@ -67,6 +71,8 @@ class MainWindow(QMainWindow):
         export_all_action = QAction("Экспорт JSON", self)
         import_action = QAction("Импорт JSON", self)
         backup_action = QAction("Резервная копия", self)
+        pomodoro_action = QAction("Помодоро", self)
+        pomodoro_action.triggered.connect(self._open_pomodoro_popup)
 
         prev_action.triggered.connect(self.prev_week)
         next_action.triggered.connect(self.next_week)
@@ -84,6 +90,75 @@ class MainWindow(QMainWindow):
         toolbar.addAction(export_all_action)
         toolbar.addAction(import_action)
         toolbar.addAction(backup_action)
+        toolbar.addSeparator()
+        toolbar.addAction(pomodoro_action)
+
+        pomodoro_button = QToolButton(self)
+        pomodoro_button.setDefaultAction(pomodoro_action)
+        pomodoro_button.setText("🍅")
+        pomodoro_button.setToolTip("Помодоро")
+        pomodoro_button.setStyleSheet("font-size: 18px;")
+        toolbar.addWidget(pomodoro_button)
+
+    def _open_pomodoro_popup(self) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Помодоро")
+        dialog.setMinimumSize(420, 520)
+        dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
+        layout = QVBoxLayout(dialog)
+        config = self._load_pomodoro_config()
+        popup_view = PomodoroView(config, enable_tray=False)
+        layout.addWidget(popup_view)
+        dialog.exec()
+
+    def _apply_theme(self) -> None:
+        self.setStyleSheet(
+            """
+            QMainWindow {
+                background-color: #f6f7fb;
+            }
+            QToolBar {
+                background: #ffffff;
+                border-bottom: 1px solid #e3e6ee;
+                spacing: 8px;
+                padding: 6px;
+            }
+            QToolButton, QPushButton {
+                background: #ffffff;
+                border: 1px solid #d7dbe7;
+                border-radius: 8px;
+                padding: 6px 12px;
+            }
+            QToolButton:hover, QPushButton:hover {
+                background: #f0f3fb;
+            }
+            QTabWidget::pane {
+                border: 1px solid #e3e6ee;
+                border-radius: 10px;
+                background: #ffffff;
+            }
+            QTabBar::tab {
+                background: #eef1f8;
+                border: 1px solid #d7dbe7;
+                border-radius: 8px;
+                padding: 6px 12px;
+                margin: 4px;
+            }
+            QTabBar::tab:selected {
+                background: #ffffff;
+                border: 1px solid #c9cfe0;
+            }
+            QLabel {
+                color: #1f2430;
+            }
+            QLineEdit, QListWidget, QSpinBox, QComboBox {
+                background: #ffffff;
+                border: 1px solid #d7dbe7;
+                border-radius: 8px;
+                padding: 6px;
+            }
+            """
+        )
 
     def _bind_shortcuts(self) -> None:
         QShortcut(QKeySequence("Ctrl+S"), self, activated=self.save_all)

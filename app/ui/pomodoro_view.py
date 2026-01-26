@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QSystemTrayIcon,
     QApplication,
+    QStyle,
 )
 
 from app import db
@@ -23,15 +24,19 @@ from app.pomodoro import PomodoroConfig, PomodoroTimer
 
 
 class PomodoroView(QWidget):
-    def __init__(self, config: PomodoroConfig) -> None:
+    def __init__(self, config: PomodoroConfig, *, enable_tray: bool = True) -> None:
         super().__init__()
         self._config = config
         self._timer = PomodoroTimer(config)
         self._timer.tick.connect(self._update_timer)
         self._timer.session_complete.connect(self._handle_complete)
-        self._tray = QSystemTrayIcon(self)
-        self._tray.setIcon(QApplication.style().standardIcon(QApplication.style().SP_ComputerIcon))
-        self._tray.setVisible(True)
+        self._tray: QSystemTrayIcon | None = None
+        if enable_tray:
+            self._tray = QSystemTrayIcon(self)
+            style = QApplication.style()
+            standard_icon = getattr(QStyle.StandardPixmap, "SP_ComputerIcon", QStyle.StandardPixmap.SP_DesktopIcon)
+            self._tray.setIcon(style.standardIcon(standard_icon))
+            self._tray.setVisible(True)
 
         layout = QVBoxLayout(self)
         self._timer_label = QLabel("25:00")
@@ -116,7 +121,8 @@ class PomodoroView(QWidget):
 
     def _handle_complete(self, mode: str) -> None:
         message = "Фокус завершён" if mode != "focus" else "Перерыв завершён"
-        self._tray.showMessage("Помодоро", message)
+        if self._tray:
+            self._tray.showMessage("Помодоро", message)
         self.refresh_sessions()
 
     def refresh_sessions(self) -> None:

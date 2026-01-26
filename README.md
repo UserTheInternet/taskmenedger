@@ -36,6 +36,14 @@ iscc installer\Taskmenedger.iss
 scripts\build_installer.ps1
 ```
 
+## Обновление кода из Git
+
+Если вы меняете код в репозитории и хотите подтянуть свежие изменения:
+```powershell
+scripts\update_from_git.ps1 -RepoPath "C:\path\to\taskmenedger" -Branch "main"
+```
+После обновления пересоберите setup через `scripts\build_installer.ps1`.
+
 ## Данные
 
 По умолчанию база хранится в `%APPDATA%/Taskmenedger/planner.db`.

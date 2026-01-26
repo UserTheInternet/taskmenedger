@@ -36,6 +36,16 @@ iscc installer\Taskmenedger.iss
 scripts\build_installer.ps1
 ```
 
+## Автоматическая сборка setup в GitHub Actions
+
+В репозитории есть workflow для Windows-сборки. Он запускается:
+- вручную (workflow_dispatch),
+- или при создании тега `v*`.
+
+После выполнения получите артефакты:
+- `Taskmenedger.exe` (portable),
+- `Taskmenedger-Setup.exe` (установщик).
+
 ## Обновление кода из Git
 
 Если вы меняете код в репозитории и хотите подтянуть свежие изменения:

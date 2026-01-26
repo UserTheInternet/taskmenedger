@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QSystemTrayIcon,
     QApplication,
+    QStyle,
 )
 
 from app import db
@@ -30,7 +31,9 @@ class PomodoroView(QWidget):
         self._timer.tick.connect(self._update_timer)
         self._timer.session_complete.connect(self._handle_complete)
         self._tray = QSystemTrayIcon(self)
-        self._tray.setIcon(QApplication.style().standardIcon(QApplication.style().SP_ComputerIcon))
+        style = QApplication.style()
+        standard_icon = getattr(QStyle.StandardPixmap, "SP_ComputerIcon", QStyle.StandardPixmap.SP_DesktopIcon)
+        self._tray.setIcon(style.standardIcon(standard_icon))
         self._tray.setVisible(True)
 
         layout = QVBoxLayout(self)

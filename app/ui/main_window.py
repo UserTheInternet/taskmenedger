@@ -91,7 +91,6 @@ class MainWindow(QMainWindow):
         toolbar.addAction(import_action)
         toolbar.addAction(backup_action)
         toolbar.addSeparator()
-        toolbar.addAction(pomodoro_action)
 
         pomodoro_button = QToolButton(self)
         pomodoro_button.setDefaultAction(pomodoro_action)

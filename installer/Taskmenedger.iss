@@ -22,7 +22,9 @@ UninstallDisplayIcon={app}\{#AppExeName}
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Files]
+
 Source: "{#SourcePath}..\dist\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"

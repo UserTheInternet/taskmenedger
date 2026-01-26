@@ -4,3 +4,7 @@ __pycache__/
 data/
 portable.flag
 *.db
+dist/
+build/
+*.spec
+installer/Output/

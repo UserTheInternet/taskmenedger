@@ -5,11 +5,10 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from PySide6.QtCore import QDate, QTimer
-from PySide6.QtGui import QKeySequence, QAction
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QFileDialog,
     QMainWindow,
-    QShortcut,
     QTabWidget,
     QToolBar,
 )

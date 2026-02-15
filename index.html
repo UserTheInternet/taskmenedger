@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Планировщик" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <title>Недельный планировщик</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --line: #ececec;
+      --text: #1f1f1f;
+      --muted: #7b7b7b;
+      --done: #a5a5a5;
+      --accent: #111111;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px 20px 120px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .tabs {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .install-btn {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      height: 40px;
+      padding: 0 14px;
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+    }
+
+    .install-hint {
+      width: 100%;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tab {
+      border: none;
+      border-right: 1px solid var(--line);
+      background: #fff;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .tab:last-child { border-right: none; }
+    .tab.active { color: var(--text); background: #f8f8f8; }
+
+    .week {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(120px, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .day-column {
+      min-height: 300px;
+      border-right: 1px solid var(--line);
+      padding: 10px;
+      background: #fff;
+    }
+
+    .day-column:last-child { border-right: none; }
+
+    .day-column.drag-over,
+    .someday.drag-over {
+      background: #fafafa;
+    }
+
+    .day-title {
+      margin: 0 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 190px;
+    }
+
+    .task {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+      line-height: 1.3;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+    }
+
+    .task.done {
+      text-decoration: line-through;
+      color: var(--done);
+    }
+
+    .inline-input {
+      margin-top: 8px;
+      width: 100%;
+      border: 1px dashed var(--line);
+      background: #fff;
+      border-radius: 8px;
+      height: 34px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .inline-input:focus { border-style: solid; }
+
+    .someday {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      min-height: 120px;
+    }
+
+    .someday-title {
+      margin: 0 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .pomodoro {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px;
+      width: 180px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+    }
+
+    .pomodoro-time {
+      font-size: 32px;
+      letter-spacing: 0.02em;
+      text-align: center;
+      margin: 0 0 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pomodoro button {
+      width: 100%;
+      border: 1px solid var(--accent);
+      background: #fff;
+      border-radius: 8px;
+      height: 36px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1000px) {
+      .week { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+      .day-column { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Недельный планировщик</h1>
+
+    <div class="top-actions">
+      <div class="tabs" id="tabs">
+        <button class="tab active" type="button" data-board="my">Задачи на неделю мои</button>
+        <button class="tab" type="button" data-board="team">Задачи на неделю сотрудников</button>
+      </div>
+      <button id="installBtn" class="install-btn" type="button">Установить как приложение</button>
+      <p class="install-hint" id="installHint">Подсказка: для установки откройте через http://127.0.0.1 (не file://).</p>
+    </div>
+
+    <section id="weekBoard" class="week"></section>
+
+    <section id="somedayZone" class="someday" data-day="Когда-нибудь">
+      <h2 class="someday-title">Когда-нибудь</h2>
+      <div class="task-list" id="somedayList"></div>
+      <input class="inline-input" data-day-input="Когда-нибудь" type="text" placeholder="+ Новая задача" />
+    </section>
+  </div>
+
+  <aside class="pomodoro">
+    <p class="pomodoro-time" id="pomodoroTime">25:00</p>
+    <button id="pomodoroBtn" type="button">Старт</button>
+  </aside>
+
+  <script>
+    const DAYS = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+    const SOMEDAY = "Когда-нибудь";
+    const STORAGE_KEY = "weekly-planner-russian-v2";
+
+    const POMODORO_TOTAL_SECONDS = 25 * 60;
+    let pomodoroSeconds = POMODORO_TOTAL_SECONDS;
+    let pomodoroTimerId = null;
+    let deferredInstallPrompt = null;
+
+    const state = {
+      currentBoard: "my",
+      boards: loadBoards()
+    };
+
+    /** Загружает все доски задач из localStorage. */
+    function loadBoards() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return { my: [], team: [] };
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          my: Array.isArray(parsed.my) ? parsed.my : [],
+          team: Array.isArray(parsed.team) ? parsed.team : []
+        };
+      } catch {
+        return { my: [], team: [] };
+      }
+    }
+
+    /** Сохраняет состояние всех досок в localStorage. */
+    function saveBoards() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.boards));
+    }
+
+    /** Возвращает активный список задач текущей вкладки. */
+    function currentTasks() {
+      return state.boards[state.currentBoard];
+    }
+
+    /** Строит 7 колонок недели и встраивает поле ввода прямо в каждую колонку. */
+    function buildWeekBoard() {
+      const board = document.getElementById("weekBoard");
+      board.innerHTML = DAYS.map((day) => `
+        <article class="day-column" data-day="${day}">
+          <h2 class="day-title">${day}</h2>
+          <div class="task-list" id="list-${day}"></div>
+          <input class="inline-input" data-day-input="${day}" type="text" placeholder="+ Новая задача" />
+        </article>
+      `).join("");
+
+      [...document.querySelectorAll(".day-column"), document.getElementById("somedayZone")]
+        .forEach((zone) => {
+          zone.addEventListener("dragover", onZoneDragOver);
+          zone.addEventListener("dragleave", onZoneDragLeave);
+          zone.addEventListener("drop", onZoneDrop);
+        });
+
+      document.querySelectorAll("[data-day-input]").forEach((inputEl) => {
+        inputEl.addEventListener("keydown", onInlineInputKeydown);
+      });
+    }
+
+    /** Рендерит задачи по дням активной вкладки. */
+    function render() {
+      const tasks = currentTasks();
+      [...DAYS, SOMEDAY].forEach((day) => {
+        const list = day === SOMEDAY
+          ? document.getElementById("somedayList")
+          : document.getElementById(`list-${day}`);
+
+        list.innerHTML = tasks
+          .filter((task) => task.day === day)
+          .map((task) => `
+            <div class="task ${task.done ? "done" : ""}" draggable="true" data-id="${task.id}" title="Клик: выполнить / отменить">
+              ${escapeHtml(task.title)}
+            </div>
+          `)
+          .join("");
+      });
+
+      document.querySelectorAll(".task").forEach((taskEl) => {
+        taskEl.addEventListener("click", onTaskClick);
+        taskEl.addEventListener("dragstart", onTaskDragStart);
+      });
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.board === state.currentBoard);
+      });
+    }
+
+    /** Экранирует HTML-сущности в тексте задачи. */
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    /** Регистрирует service worker для офлайн-режима. */
+    function setupPwa() {
+      const installBtn = document.getElementById("installBtn");
+      const installHint = document.getElementById("installHint");
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {
+          installHint.textContent = "Service Worker не зарегистрировался. Проверьте запуск через http://127.0.0.1.";
+        });
+      }
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installBtn.style.display = "inline-block";
+        installHint.textContent = "Нажмите кнопку справа, чтобы установить приложение на рабочий стол.";
+      });
+
+      installBtn.addEventListener("click", () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(() => {
+          deferredInstallPrompt = null;
+          installBtn.style.display = "none";
+        });
+      });
+
+      window.addEventListener("appinstalled", () => {
+        installHint.textContent = "Приложение установлено. Теперь оно будет запускаться в отдельном окне.";
+        installBtn.style.display = "none";
+      });
+    }
+
+    /** Добавляет задачу в выбранный день текущей вкладки. */
+    function addTask(title, day) {
+      const cleanTitle = title.trim();
+      if (!cleanTitle) return;
+
+      currentTasks().push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        title: cleanTitle,
+        day,
+        done: false
+      });
+
+      saveBoards();
+      render();
+    }
+
+    /** Добавляет задачу по Enter из инлайн-поля внутри колонки дня. */
+    function onInlineInputKeydown(event) {
+      if (event.key !== "Enter") return;
+      const day = event.currentTarget.dataset.dayInput;
+      addTask(event.currentTarget.value, day);
+      event.currentTarget.value = "";
+    }
+
+    /** Переключает статус выполнения задачи при клике. */
+    function onTaskClick(event) {
+      const id = Number(event.currentTarget.dataset.id);
+      const task = currentTasks().find((item) => item.id === id);
+      if (!task) return;
+
+      task.done = !task.done;
+      saveBoards();
+      render();
+    }
+
+    /** Начинает перенос задачи drag&drop. */
+    function onTaskDragStart(event) {
+      event.dataTransfer.setData("text/plain", event.currentTarget.dataset.id);
+      event.dataTransfer.effectAllowed = "move";
+    }
+
+    /** Разрешает drop и подсвечивает цель переноса. */
+    function onZoneDragOver(event) {
+      event.preventDefault();
+      event.currentTarget.classList.add("drag-over");
+    }
+
+    /** Убирает подсветку зоны после ухода курсора. */
+    function onZoneDragLeave(event) {
+      event.currentTarget.classList.remove("drag-over");
+    }
+
+    /** Переносит задачу в нужный день и сохраняет изменения. */
+    function onZoneDrop(event) {
+      event.preventDefault();
+      event.currentTarget.classList.remove("drag-over");
+
+      const taskId = Number(event.dataTransfer.getData("text/plain"));
+      const day = event.currentTarget.dataset.day;
+      const task = currentTasks().find((item) => item.id === taskId);
+      if (!task || !day) return;
+
+      task.day = day;
+      saveBoards();
+      render();
+    }
+
+    /** Переключает вкладку (мои задачи / задачи сотрудников). */
+    function onTabClick(event) {
+      const board = event.target.dataset.board;
+      if (!board) return;
+      state.currentBoard = board;
+      render();
+    }
+
+    /** Обновляет текст таймера формата MM:SS. */
+    function updatePomodoroDisplay() {
+      const mm = String(Math.floor(pomodoroSeconds / 60)).padStart(2, "0");
+      const ss = String(pomodoroSeconds % 60).padStart(2, "0");
+      document.getElementById("pomodoroTime").textContent = `${mm}:${ss}`;
+    }
+
+    /** Полный сброс Pomodoro к 25:00. */
+    function resetPomodoro() {
+      clearInterval(pomodoroTimerId);
+      pomodoroTimerId = null;
+      pomodoroSeconds = POMODORO_TOTAL_SECONDS;
+      updatePomodoroDisplay();
+      document.getElementById("pomodoroBtn").textContent = "Старт";
+    }
+
+    /** Старт/стоп фиксированного 25-минутного Pomodoro. */
+    function togglePomodoro() {
+      const button = document.getElementById("pomodoroBtn");
+
+      if (pomodoroTimerId) {
+        clearInterval(pomodoroTimerId);
+        pomodoroTimerId = null;
+        button.textContent = "Старт";
+        return;
+      }
+
+      button.textContent = "Стоп";
+      pomodoroTimerId = setInterval(() => {
+        pomodoroSeconds -= 1;
+        updatePomodoroDisplay();
+
+        if (pomodoroSeconds <= 0) {
+          alert("Pomodoro finished!");
+          resetPomodoro();
+        }
+      }, 1000);
+    }
+
+    /** Инициализация приложения и подписок на события. */
+    function init() {
+      buildWeekBoard();
+      render();
+      updatePomodoroDisplay();
+      setupPwa();
+
+      document.getElementById("tabs").addEventListener("click", onTabClick);
+      document.getElementById("pomodoroBtn").addEventListener("click", togglePomodoro);
+    }
+
+    init();
+  </script>
+</body>
+</html>

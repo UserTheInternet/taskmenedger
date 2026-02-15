@@ -1,71 +1,76 @@
+ИЗМЕНЕННЫЕ ФАЙЛЫ (последнее обновление):
+- README.md
+- scripts/export_web_files.py
+
 # Taskmenedger MVP
 
-Локальный планер с недельным разворотом и помодоро (MVP) для Windows 10/11.
+Локальный планировщик в стиле weekly paper (похоже на tweek.so) с PWA-режимом и хранением задач в Markdown-vault.
 
-## Быстрый старт (dev)
+## Быстрый запуск web-версии (Windows)
+
+1. Положите файлы проекта в одну папку.
+2. Запустите `start_web_planner.bat`.
+3. Откройте `http://127.0.0.1:8765/index.html`.
+4. Нажмите **Выбрать Vault** и укажите папку-хранилище.
+
+> Для Vault нужен Chromium-браузер (Chrome/Edge/Яндекс) с File System Access API.
+
+## Если открывается старая версия или в логах есть 404 на `/css` и `/js`
+
+Причина: запускается неполный набор файлов (только `index.html`, без папок `css/` и `js/`).
+
+Соберите и копируйте web-версию только так:
 
 ```bash
-python -m venv .venv
-. .venv/Scripts/activate
-pip install -r requirements.txt
-python -m app.main
+python3 scripts/export_web_files.py
 ```
 
-## Сборка portable и setup (без Python у пользователя)
+После этого берите папку `dist/weekly-planner-pwa/` целиком (вместе с `css/`, `js/`, `start_web_planner.bat`).
 
-### 1) Portable exe (PyInstaller)
-```powershell
-python -m venv .venv
-. .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-pip install pyinstaller
-pyinstaller --noconfirm --onefile --windowed --name Taskmenedger app/main.py
-```
-Готовый файл будет в `dist/Taskmenedger.exe`.
+## Vault-структура (как в Obsidian)
 
-### 2) Setup (Inno Setup)
-Установите **Inno Setup 6** и убедитесь, что `iscc.exe` доступен в `PATH`.
-Затем выполните:
-```powershell
-iscc installer\Taskmenedger.iss
-```
-Готовый установщик будет в `installer/Output/Taskmenedger-Setup.exe`.
+После выбора папки автоматически создаются:
 
-### 3) Скрипт сборки одной командой
-```powershell
-scripts\build_installer.ps1
+```text
+/vault
+  /weeks
+  /people
+  inbox.md
+  someday.md
+  config.json
 ```
 
-## Автоматическая сборка setup в GitHub Actions
+- Недельные задачи пишутся в `weeks/YYYY-Www.md`.
+- Сотрудники — в `people/<Имя>.md`.
+- Someday-задачи — в `someday.md`.
 
-В репозитории есть workflow для Windows-сборки. Он запускается:
-- вручную (workflow_dispatch),
-- или при создании тега `v*`.
+## Импорт старых данных
 
-После выполнения получите артефакты:
-- `Taskmenedger.exe` (portable),
-- `Taskmenedger-Setup.exe` (установщик).
+В шапке приложения есть кнопка **Импортировать из старого localStorage**.
+Она переносит данные из старого ключа `weekly-planner-russian-v2` в Markdown vault.
 
-## Обновление кода из Git
+## Архитектура web-клиента
 
-Если вы меняете код в репозитории и хотите подтянуть свежие изменения:
-```powershell
-scripts\update_from_git.ps1 -RepoPath "C:\path\to\taskmenedger" -Branch "main"
+```text
+index.html
+css/styles.css
+js/app.js
+js/ui/render.js
+js/ui/events.js
+js/domain/task.js
+js/domain/employee.js
+js/storage/vaultFs.js
+js/storage/vaultIndex.js
+js/utils/date.js
+js/utils/md.js
+sw.js
+manifest.webmanifest
+icon.svg
+start_web_planner.bat
 ```
-После обновления пересоберите setup через `scripts\build_installer.ps1`.
 
-## Данные
+## PWA
 
-По умолчанию база хранится в `%APPDATA%/Taskmenedger/planner.db`.
-Для portable-режима создайте файл `portable.flag` рядом с исполняемым файлом — данные будут в папке `data/`.
-
-## Горячие клавиши
-
-- `Ctrl+S` — сохранить
-- `Ctrl+F` — поиск
-- `Ctrl+Z` — undo
-- `Ctrl+Enter` — новая строка
-
-## Экспорт/импорт
-
-Доступны из панели инструментов.
+- Приложение работает офлайн.
+- Service Worker кэширует только фронтенд-ассеты.
+- Содержимое vault не кэшируется Service Worker.

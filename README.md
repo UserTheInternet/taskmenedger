@@ -1,71 +1,103 @@
+ИЗМЕНЕННЫЕ ФАЙЛЫ (последнее обновление):
+- README.md
+- scripts/export_web_files.py
+- scripts/verify_web_bundle.py
+- verify_web_bundle.bat
+- start_web_planner.bat
+
 # Taskmenedger MVP
 
-Локальный планер с недельным разворотом и помодоро (MVP) для Windows 10/11.
+Локальный планировщик в стиле weekly paper (похоже на tweek.so) с PWA-режимом и хранением задач в Markdown-vault.
 
-## Быстрый старт (dev)
+## Если вы НЕ пользуетесь git (ваш сценарий)
+
+Рабочий способ: просто копировать **готовую папку**.
+
+1. На исходной машине выполните:
+   ```bash
+   python scripts/export_web_files.py
+   ```
+2. Возьмите папку `dist/weekly-planner-pwa/` **целиком** (не отдельные файлы).
+3. Перенесите эту папку на Рабочий стол.
+4. Откройте её и запустите `verify_web_bundle.bat` (двойной клик).
+5. Если видите `COMPLETE` — запускайте `start_web_planner.bat`.
+
+## Быстрый запуск web-версии (Windows)
+
+1. Положите файлы проекта в одну папку.
+2. Запустите `start_web_planner.bat`.
+3. Откройте `http://127.0.0.1:8765/index.html`.
+4. Нажмите **Выбрать Vault** и укажите папку-хранилище.
+
+> Для Vault нужен Chromium-браузер (Chrome/Edge/Яндекс) с File System Access API.
+
+## Если открывается старая версия или в логах есть 404 на `/css` и `/js`
+
+Причина: запускается неполный набор файлов (только `index.html`, без папок `css/` и `js/`).
+
+Проверка по шагам:
 
 ```bash
-python -m venv .venv
-. .venv/Scripts/activate
-pip install -r requirements.txt
-python -m app.main
+verify_web_bundle.bat
 ```
 
-## Сборка portable и setup (без Python у пользователя)
+- `COMPLETE` → можно запускать.
+- `INCOMPLETE` → скрипт выведет, каких файлов не хватает.
 
-### 1) Portable exe (PyInstaller)
-```powershell
-python -m venv .venv
-. .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-pip install pyinstaller
-pyinstaller --noconfirm --onefile --windowed --name Taskmenedger app/main.py
-```
-Готовый файл будет в `dist/Taskmenedger.exe`.
+Собирайте и копируйте web-версию только так:
 
-### 2) Setup (Inno Setup)
-Установите **Inno Setup 6** и убедитесь, что `iscc.exe` доступен в `PATH`.
-Затем выполните:
-```powershell
-iscc installer\Taskmenedger.iss
-```
-Готовый установщик будет в `installer/Output/Taskmenedger-Setup.exe`.
-
-### 3) Скрипт сборки одной командой
-```powershell
-scripts\build_installer.ps1
+```bash
+python scripts/export_web_files.py
 ```
 
-## Автоматическая сборка setup в GitHub Actions
+После этого берите папку `dist/weekly-planner-pwa/` целиком (вместе с `css/`, `js/`, `start_web_planner.bat`, `verify_web_bundle.bat`, `verify_web_bundle.py`).
 
-В репозитории есть workflow для Windows-сборки. Он запускается:
-- вручную (workflow_dispatch),
-- или при создании тега `v*`.
+## Vault-структура (как в Obsidian)
 
-После выполнения получите артефакты:
-- `Taskmenedger.exe` (portable),
-- `Taskmenedger-Setup.exe` (установщик).
+После выбора папки автоматически создаются:
 
-## Обновление кода из Git
-
-Если вы меняете код в репозитории и хотите подтянуть свежие изменения:
-```powershell
-scripts\update_from_git.ps1 -RepoPath "C:\path\to\taskmenedger" -Branch "main"
+```text
+/vault
+  /weeks
+  /people
+  inbox.md
+  someday.md
+  config.json
 ```
-После обновления пересоберите setup через `scripts\build_installer.ps1`.
 
-## Данные
+- Недельные задачи пишутся в `weeks/YYYY-Www.md`.
+- Сотрудники — в `people/<Имя>.md`.
+- Someday-задачи — в `someday.md`.
 
-По умолчанию база хранится в `%APPDATA%/Taskmenedger/planner.db`.
-Для portable-режима создайте файл `portable.flag` рядом с исполняемым файлом — данные будут в папке `data/`.
+## Импорт старых данных
 
-## Горячие клавиши
+В шапке приложения есть кнопка **Импортировать из старого localStorage**.
+Она переносит данные из старого ключа `weekly-planner-russian-v2` в Markdown vault.
 
-- `Ctrl+S` — сохранить
-- `Ctrl+F` — поиск
-- `Ctrl+Z` — undo
-- `Ctrl+Enter` — новая строка
+## Архитектура web-клиента
 
-## Экспорт/импорт
+```text
+index.html
+css/styles.css
+js/app.js
+js/ui/render.js
+js/ui/events.js
+js/domain/task.js
+js/domain/employee.js
+js/storage/vaultFs.js
+js/storage/vaultIndex.js
+js/utils/date.js
+js/utils/md.js
+sw.js
+manifest.webmanifest
+icon.svg
+start_web_planner.bat
+verify_web_bundle.bat
+verify_web_bundle.py
+```
 
-Доступны из панели инструментов.
+## PWA
+
+- Приложение работает офлайн.
+- Service Worker кэширует только фронтенд-ассеты.
+- Содержимое vault не кэшируется Service Worker.

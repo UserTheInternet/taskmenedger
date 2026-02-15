@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Планировщик">
+  <rect width="512" height="512" rx="84" fill="#111111"/>
+  <rect x="88" y="110" width="336" height="292" rx="28" fill="#ffffff"/>
+  <rect x="120" y="164" width="272" height="18" rx="9" fill="#d9d9d9"/>
+  <rect x="120" y="210" width="180" height="18" rx="9" fill="#d9d9d9"/>
+  <rect x="120" y="256" width="232" height="18" rx="9" fill="#d9d9d9"/>
+  <rect x="120" y="302" width="146" height="18" rx="9" fill="#d9d9d9"/>
+</svg>

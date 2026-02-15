@@ -1,0 +1,231 @@
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --line: #e8e8e8;
+  --text: #1f1f1f;
+  --muted: #7c7c7c;
+  --accent: #1b1b1b;
+  --paper-line: #f3f3f3;
+}
+
+body[data-theme="dark"] {
+  --bg: #101214;
+  --surface: #161a1d;
+  --line: #2c333a;
+  --text: #e8edf2;
+  --muted: #9fa9b3;
+  --accent: #f3f6f8;
+  --paper-line: #1d2227;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  width: 100%;
+  max-width: none;
+  padding: 16px 24px 120px;
+}
+
+.topbar h1 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.tabs, .segment {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.tab, .mode-btn {
+  border: none;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.tab:last-child, .mode-btn:last-child { border-right: none; }
+.tab.active, .mode-btn.active { color: var(--text); background: rgba(120,120,120,0.12); }
+
+.controls {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.status {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.btn, .date-input, .inline-input, .quick-add {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.btn { cursor: pointer; }
+
+.range-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.quick-add {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.board {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.column {
+  border-right: 1px solid var(--line);
+  min-height: 420px;
+  padding: 8px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--surface) 0px,
+    var(--surface) 29px,
+    var(--paper-line) 30px
+  );
+}
+
+.column:last-child { border-right: none; }
+.column.drag-over { background: rgba(100,120,160,0.12); }
+
+.column h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.task:hover { border-color: var(--line); }
+.task.done .task-title { text-decoration: line-through; color: var(--muted); }
+.task input { pointer-events: none; }
+
+.task-title {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.someday {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--surface);
+}
+
+.someday h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.hidden { display: none !important; }
+
+.pomodoro {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 230px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.pomodoro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pomodoro-time {
+  margin: 6px 0;
+  text-align: center;
+  font-size: 34px;
+}
+
+.icon-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.pomodoro-settings {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.pomodoro-settings label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pomodoro-settings input {
+  width: 80px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 6px;
+  height: 28px;
+}
+
+.full { width: 100%; }
+
+@media (max-width: 900px) {
+  .board { grid-template-columns: repeat(2, minmax(160px, 1fr)) !important; }
+}

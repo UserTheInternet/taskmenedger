@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Планировщик" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <title>Taskmenedger Vault Planner</title>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>Планировщик</h1>
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="my" type="button">Мои задачи</button>
+        <button class="tab" data-tab="team" type="button">Задачи сотрудников</button>
+      </div>
+      <div class="controls">
+        <div class="segment" id="modeSwitch">
+          <button class="mode-btn active" data-mode="day" type="button">День</button>
+          <button class="mode-btn" data-mode="week" type="button">Неделя</button>
+          <button class="mode-btn" data-mode="month" type="button">Месяц</button>
+        </div>
+        <button id="prevBtn" class="btn" type="button">←</button>
+        <input id="datePicker" class="date-input" type="date" />
+        <button id="nextBtn" class="btn" type="button">→</button>
+        <span id="rangeLabel" class="range-label"></span>
+        <button id="addEmployeeBtn" class="btn hidden" type="button">+ Сотрудник</button>
+        <button id="themeBtn" class="btn" type="button">Тёмная тема</button>
+      </div>
+      <div class="controls second-row">
+        <button id="pickVaultBtn" class="btn" type="button">Выбрать Vault</button>
+        <button id="importLegacyBtn" class="btn" type="button">Импортировать из старого localStorage</button>
+        <button id="installBtn" class="btn hidden" type="button">Установить как приложение</button>
+      </div>
+      <p id="statusText" class="status">Vault не выбран. Нажмите «Выбрать Vault».</p>
+    </header>
+
+    <input id="quickAddInput" class="quick-add" type="text" placeholder="Быстрое добавление" />
+
+    <main id="board" class="board"></main>
+
+    <section id="somedayZone" class="someday" data-drop-zone="someday">
+      <h2>Someday</h2>
+      <div id="somedayList" class="task-list"></div>
+      <input id="somedayInput" class="inline-input" type="text" placeholder="+ Новая задача в Someday" />
+    </section>
+  </div>
+
+  <aside class="pomodoro">
+    <div class="pomodoro-header">
+      <span id="pomodoroModeLabel">Фокус</span>
+      <div>
+        <button id="pomodoroSoundBtn" class="icon-btn" type="button" title="Звук">🔔</button>
+        <button id="pomodoroSettingsBtn" class="icon-btn" type="button" title="Настройки">⚙</button>
+      </div>
+    </div>
+    <p id="pomodoroTime" class="pomodoro-time">25:00</p>
+    <button id="pomodoroToggleBtn" class="btn full" type="button">Старт</button>
+    <div id="pomodoroSettings" class="pomodoro-settings hidden">
+      <label>Фокус (мин) <input id="focusInput" type="number" min="1" max="180" /></label>
+      <label>Короткий перерыв <input id="shortInput" type="number" min="1" max="60" /></label>
+      <label>Длинный перерыв <input id="longInput" type="number" min="1" max="120" /></label>
+      <label>Циклов до длинного <input id="cyclesInput" type="number" min="1" max="12" /></label>
+      <button id="savePomodoroBtn" class="btn full" type="button">Сохранить</button>
+    </div>
+  </aside>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

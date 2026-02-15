@@ -1,10 +1,25 @@
 ИЗМЕНЕННЫЕ ФАЙЛЫ (последнее обновление):
 - README.md
 - scripts/export_web_files.py
+- scripts/verify_web_bundle.py
+- start_web_planner.bat
 
 # Taskmenedger MVP
 
 Локальный планировщик в стиле weekly paper (похоже на tweek.so) с PWA-режимом и хранением задач в Markdown-vault.
+
+## Если вы НЕ пользуетесь git (ваш сценарий)
+
+Рабочий способ: просто копировать **готовую папку**.
+
+1. На исходной машине выполните:
+   ```bash
+   python scripts/export_web_files.py
+   ```
+2. Возьмите папку `dist/weekly-planner-pwa/` **целиком** (не отдельные файлы).
+3. Перенесите эту папку на Рабочий стол.
+4. Откройте её и запустите `python verify_web_bundle.py`.
+5. Если видите `COMPLETE` — запускайте `start_web_planner.bat`.
 
 ## Быстрый запуск web-версии (Windows)
 
@@ -19,13 +34,22 @@
 
 Причина: запускается неполный набор файлов (только `index.html`, без папок `css/` и `js/`).
 
-Соберите и копируйте web-версию только так:
+Проверка по шагам:
 
 ```bash
-python3 scripts/export_web_files.py
+python verify_web_bundle.py
 ```
 
-После этого берите папку `dist/weekly-planner-pwa/` целиком (вместе с `css/`, `js/`, `start_web_planner.bat`).
+- `COMPLETE` → можно запускать.
+- `INCOMPLETE` → скрипт выведет, каких файлов не хватает.
+
+Собирайте и копируйте web-версию только так:
+
+```bash
+python scripts/export_web_files.py
+```
+
+После этого берите папку `dist/weekly-planner-pwa/` целиком (вместе с `css/`, `js/`, `start_web_planner.bat`, `verify_web_bundle.py`).
 
 ## Vault-структура (как в Obsidian)
 
@@ -67,6 +91,7 @@ sw.js
 manifest.webmanifest
 icon.svg
 start_web_planner.bat
+verify_web_bundle.py
 ```
 
 ## PWA
